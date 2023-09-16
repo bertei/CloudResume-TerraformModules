@@ -58,7 +58,7 @@ data "aws_iam_policy_document" "lambda_logging_document" {
       "logs:PutLogEvents",
     ]
 
-    resources = ["${aws_cloudwatch_log_group.main.arn}"]
+    resources = ["${aws_cloudwatch_log_group.main.arn}:*"]
   }
 }
 
@@ -83,7 +83,7 @@ resource "aws_iam_role" "main" {
 ## CloudWatch ##
 resource "aws_cloudwatch_log_group" "main" {
   name              = "/aws/lambda/${var.lambda_function_name}"
-  #retention_in_days = 7
+  retention_in_days = 0
 }
 
 ## Lambda ##
