@@ -101,9 +101,9 @@ resource "aws_lambda_function" "main" {
   runtime          = "python3.9"
   source_code_hash = data.archive_file.main.output_base64sha256
 
-  #depends_on = [
-  #  aws_iam_role_policy_attachment.ddbtable_policy_attachment,
-  #  aws_iam_role_policy_attachment.logging_policy_attachment,
-  #  aws_cloudwatch_log_group.main
-  #]
+  depends_on = [
+    aws_iam_role_policy_attachment.ddbtable_policy_attachment,
+    aws_iam_role_policy_attachment.logging_policy_attachment,
+    aws_cloudwatch_log_group.main
+  ]
 }
