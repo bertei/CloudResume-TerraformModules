@@ -1,4 +1,5 @@
 ## IAM-Resources ##
+#Trust relation ship policy, so Lambda service can assume 'ViewCounter-Role' permissions.
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect = "Allow"
@@ -12,6 +13,7 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
+#DynamoDB policy, so Lambda-role can RW into the DynamoDB Table.
 data "aws_iam_policy_document" "dynamodb_table_permissions" {
   statement {
     sid = "AllowRWViewCounterTable"
@@ -47,6 +49,7 @@ resource "aws_iam_role_policy_attachment" "ddbtable_policy_attachment" {
   policy_arn = aws_iam_policy.ddbtable_permission_policy.arn
 }
 
+#Cloudwatch logs policy, allows Lambda-role to create log groups/streams.
 data "aws_iam_policy_document" "lambda_logging_document" {
   statement {
     effect = "Allow"
@@ -74,6 +77,7 @@ resource "aws_iam_role_policy_attachment" "logging_policy_attachment" {
   policy_arn = aws_iam_policy.lambda_logging_policy.arn
 }
 
+#Creates 'ViewCounter-Role'
 resource "aws_iam_role" "main" {
   name               = var.lambda_role_name
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
@@ -81,12 +85,15 @@ resource "aws_iam_role" "main" {
 
 
 ## CloudWatch ##
+#Creates Cloudwatch logs for the lambda
 resource "aws_cloudwatch_log_group" "main" {
   name              = "/aws/lambda/${var.lambda_function_name}"
   retention_in_days = 0
 }
 
 ## Lambda ##
+
+#Generates an archive from a file. Lambda.py to a .zip file.
 data "archive_file" "main" {
   type        = "zip"
   source_file = "lambda-viewcounter.py"
@@ -94,11 +101,13 @@ data "archive_file" "main" {
 }
 
 resource "aws_lambda_function" "main" {
-  filename         = "lambda-viewcounter.zip"
+  filename         = "lambda-viewcounter.zip" #File is in the same directory where the module call is. If not, use path.module
   function_name    = var.lambda_function_name
   role             = aws_iam_role.main.arn
   handler          = "lambda-viewcounter.lambda_handler" 
   runtime          = "python3.9"
+
+  #This attribute changes whenever you update the code contained in the archive. It lets lambda know that there is a new version of your code available.
   source_code_hash = data.archive_file.main.output_base64sha256
 
   depends_on = [

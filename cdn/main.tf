@@ -1,3 +1,8 @@
+#CloudFront distribution to serve content using s3 as 'origin' to host the static website.
+#It delivers your content from edge locations providing the lowest latency.
+
+#OAC secures s3 origins by only allowing access to the CDN distribution.
+#With OAC there is no need to set the bucket public. Only OAC will have access to it.
 resource "aws_cloudfront_origin_access_control" "main" {
   name  = "cloudfront-control-settings"
 
@@ -8,15 +13,15 @@ resource "aws_cloudfront_origin_access_control" "main" {
 
 resource "aws_cloudfront_distribution" "main" {
   origin {
-    domain_name              = var.domain_name
+    domain_name              = var.domain_name #Bucket domain name as the origin
     origin_access_control_id = aws_cloudfront_origin_access_control.main.id
     origin_id                = "bernatei-website-cdn"
   }
 
-  enabled             = true
+  enabled             = true #Whether the distribution is enabled to accept end user requests for content.
   default_root_object = "index.html"
 
-  aliases = ["bernatei.com"]
+  aliases = ["bernatei.com"] #Alternate domain names
 
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
@@ -31,20 +36,22 @@ resource "aws_cloudfront_distribution" "main" {
       }
     }
 
-    viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "allow-all" #Http & Https
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
   }
 
+  #Method that you want to use to restrict distribution of your content by country
   restrictions {
     geo_restriction {
       restriction_type = "none"
     }
   }
 
+  #SSL Configuration for this distribution
   viewer_certificate {
-    acm_certificate_arn = var.acm_arn
+    acm_certificate_arn = var.acm_arn #ARN of the ACM certificate to use
     ssl_support_method  = "sni-only"
     #cloudfront_default_certificate = true
   }
@@ -62,6 +69,7 @@ resource "aws_s3_bucket_policy" "main" {
   depends_on = [ aws_cloudfront_distribution.main ]
 }
 
+#Allows only CloudFront to get every object (index.html) from the bucket (origin).
 data "aws_iam_policy_document" "allow_bucket_read" {
   statement {
     sid = "AllowCloudFrontServicePrincipalReadOnly-1"
