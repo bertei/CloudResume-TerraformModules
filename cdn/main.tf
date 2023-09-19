@@ -21,7 +21,7 @@ resource "aws_cloudfront_distribution" "main" {
   enabled             = true #Whether the distribution is enabled to accept end user requests for content.
   default_root_object = "index.html"
 
-  aliases = ["bernatei.com"] #Alternate domain names
+  aliases = ["bernatei.com", "resume.bernatei.com"] #Alternate domain names
 
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
