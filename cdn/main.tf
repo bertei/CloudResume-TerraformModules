@@ -23,6 +23,17 @@ resource "aws_cloudfront_distribution" "main" {
 
   aliases = ["bernatei.com", "resume.bernatei.com"] #Alternate domain names
 
+  dynamic custom_error_response {
+    for_each = length(var.custom_error_response) > 0 ? var.custom_error_response : []
+
+    content {
+      error_code            = try(custom_error_response.value.error_code, null)
+      error_caching_min_ttl = try(custom_error_response.value.error_caching_min_ttl, 10)
+      response_code         = try(custom_error_response.value.response_code, null)
+      response_page_path    = try(custom_error_response.value.response_page_path, null)
+    }
+  }
+
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]

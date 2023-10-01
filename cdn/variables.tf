@@ -13,3 +13,9 @@ variable "bucket_id" {
 variable "bucket_arn" {
   type = any
 }
+
+variable "custom_error_response" {
+  type = any
+  default = []
+  description = "One or more custom error response."
+}
