@@ -19,3 +19,9 @@ variable "custom_error_response" {
   default = []
   description = "One or more custom error response."
 }
+
+variable "aliases" {
+  type = list(string)
+  default = [""]
+  description = "Alternate domain names"
+}
