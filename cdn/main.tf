@@ -21,7 +21,7 @@ resource "aws_cloudfront_distribution" "main" {
   enabled             = true #Whether the distribution is enabled to accept end user requests for content.
   default_root_object = "index.html"
 
-  aliases = ["bernatei.com", "resume.bernatei.com"] #Alternate domain names
+  aliases = var.aliases #Alternate domain names
 
   dynamic custom_error_response {
     for_each = length(var.custom_error_response) > 0 ? var.custom_error_response : []
